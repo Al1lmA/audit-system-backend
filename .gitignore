@@ -1,12 +1,42 @@
-# Python
+# Операционная система
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-venv/
-.env
+*.swp
 
-# Django
+# Виртуальное окружение
+venv/
+env/
+
+# Файлы конфигурации IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Лог-файлы и временные файлы
+*.log
+debug.log
+.DS_Store
+
+# Файлы базы данных SQLite (если используем)
 db.sqlite3
-media/
+*.sqlite3
+
+# Миграции, если случайно закоммитили
+*/migrations/*.py
+*/migrations/*.pyc
+
+# Файлы с переменными окружения (секретные данные)
+.env
+*.env
+
+# Медиа-файлы и статические файлы
+/media/
 staticfiles/
+
+# Файлы кэша
+*.cache
+*.mo
+*.pot
