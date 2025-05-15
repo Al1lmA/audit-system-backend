@@ -38,7 +38,7 @@ class UserViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
     def get_permissions(self):
-        if self.request.method == 'OPTIONS':
+        if self.request.method in ['OPTIONS', 'POST']:
             return [AllowAny()]
         if self.request.method in ['DELETE']:
             return [IsAdminUser()]
