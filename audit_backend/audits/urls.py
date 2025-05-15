@@ -10,5 +10,7 @@ router.register(r'reports', ReportViewSet)
 router.register(r'interactions', InteractionViewSet)
 
 urlpatterns = [
+    path('users/login/', UserLoginView.as_view(), name='user-login'),
+    path('csrf/', GetCSRFToken.as_view(), name='get-csrf-token'),
     path('', include(router.urls)),
 ]

@@ -7,6 +7,31 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from rest_framework.views import APIView
+from django.contrib.auth import authenticate, login
+from rest_framework.permissions import AllowAny
+from django.middleware.csrf import get_token
+# from django.views.decorators.csrf import csrf_exempt
+
+class GetCSRFToken(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def get(self, request):
+        return Response({'csrfToken': get_token(request)})
+
+class UserLoginView(APIView):
+    permission_classes = [AllowAny]
+    authentication_classes = []
+
+    def post(self, request):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        user = authenticate(request, username=email, password=password)  # username=email!
+        if user is not None:
+            login(request, user)
+            return Response(UserSerializer(user).data)
+        return Response({'detail': 'Неверный email или пароль'}, status=status.HTTP_400_BAD_REQUEST)
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
