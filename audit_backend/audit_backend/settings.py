@@ -78,6 +78,17 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+# CORS_ALLOW_ALL_METHODS = True
+
 ROOT_URLCONF = 'audit_backend.urls'
 
 TEMPLATES = [
@@ -163,7 +174,7 @@ REST_FRAMEWORK = {
         # Для SPA/мобильных приложений добавьте JWT или TokenAuthentication
     ],
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
     ],
 }
 

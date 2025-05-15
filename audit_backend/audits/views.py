@@ -9,7 +9,7 @@ from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate, login
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from django.middleware.csrf import get_token
 # from django.views.decorators.csrf import csrf_exempt
 
@@ -36,6 +36,13 @@ class UserLoginView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    def get_permissions(self):
+        if self.request.method == 'OPTIONS':
+            return [AllowAny()]
+        if self.request.method in ['DELETE']:
+            return [IsAdminUser()]
+        return [IsAuthenticated()]
 
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all()
