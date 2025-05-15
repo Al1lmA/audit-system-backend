@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'audits',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -145,3 +146,4 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+

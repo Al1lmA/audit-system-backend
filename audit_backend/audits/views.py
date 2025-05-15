@@ -5,6 +5,8 @@ from .serializers import *
 from .permissions import *
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
