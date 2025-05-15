@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets, permissions, status, parsers
 from .models import *
 from .serializers import *
+from .permissions import *
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
@@ -12,6 +13,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
+    permission_classes = [IsAdmin]
 
 class AuditViewSet(viewsets.ModelViewSet):
     queryset = Audit.objects.all()
@@ -20,6 +22,7 @@ class AuditViewSet(viewsets.ModelViewSet):
         if self.action in ['list', 'retrieve']:
             return AuditReadSerializer
         return AuditWriteSerializer
+    permission_classes = [IsExpertOrAdmin]  # Только эксперт или админ
     
     @action(detail=True, methods=['post'], parser_classes=[parsers.MultiPartParser])
     def upload_questionnaire(self, request, pk=None):
@@ -76,6 +79,7 @@ class ReportViewSet(viewsets.ModelViewSet):
 class InteractionViewSet(viewsets.ModelViewSet):
     queryset = Interaction.objects.all()
     serializer_class = InteractionSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
     @action(detail=False, methods=['post'], parser_classes=[parsers.MultiPartParser])
     def add_comment(self, request):
