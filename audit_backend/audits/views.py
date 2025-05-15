@@ -43,11 +43,24 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.request.method in ['DELETE']:
             return [IsAdminUser()]
         return [IsAuthenticated()]
+    
+    @action(detail=True, methods=['post'], url_path='change_password')
+    def change_password(self, request, pk=None):
+        user = self.get_object()
+        old_password = request.data.get('old_password')
+        new_password = request.data.get('new_password')
+        if not user.check_password(old_password):
+            return Response({'detail': 'Current password is incorrect.'}, status=status.HTTP_400_BAD_REQUEST)
+        if not new_password or len(new_password) < 6:
+            return Response({'detail': 'New password must be at least 6 characters.'}, status=status.HTTP_400_BAD_REQUEST)
+        user.set_password(new_password)
+        user.save()
+        return Response({'detail': 'Password changed successfully.'})
 
 class CompanyViewSet(viewsets.ModelViewSet):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
-    permission_classes = [IsAdmin]
+    permission_classes = [IsAuthenticated]
 
 class AuditViewSet(viewsets.ModelViewSet):
     queryset = Audit.objects.all()
