@@ -10,7 +10,7 @@ class User(AbstractUser):
     ]
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     organization = models.ForeignKey('Company', null=True, blank=True, on_delete=models.SET_NULL)
-    status = models.CharField(max_length=20, default='active')
+    # status = models.CharField(max_length=20, default='active')
     last_login = models.DateTimeField(null=True, blank=True)
     phone = models.CharField(max_length=20, blank=True)
     created_at = models.DateTimeField(auto_now_add=True) 
