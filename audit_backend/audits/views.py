@@ -16,7 +16,11 @@ from django.http import FileResponse, Http404
 import os
 from django.conf import settings
 from urllib.parse import unquote, quote
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils.decorators import method_decorator
+from rest_framework.parsers import MultiPartParser, FormParser
 
+@method_decorator(ensure_csrf_cookie, name='dispatch')
 class GetCSRFToken(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
@@ -131,14 +135,52 @@ class InteractionViewSet(viewsets.ModelViewSet):
     queryset = Interaction.objects.all()
     serializer_class = InteractionSerializer
     permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser] # Добавьте парсеры
 
-    @action(detail=False, methods=['post'], parser_classes=[parsers.MultiPartParser])
+    @action(detail=False, methods=['post'], parser_classes=[MultiPartParser])
     def add_comment(self, request):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'status': 'comment added'})
-        return Response(serializer.errors, status=400)
+        # Обработка файлов
+        files = request.FILES.getlist('files')
+        
+        # Создаем Interaction
+        interaction = Interaction.objects.create(
+            expert_comment=request.data.get('expert_comment'),
+            audit_id=request.data.get('audit')
+        )
+        
+        # Прикрепляем файлы
+        for file in files:
+            FileAttachment.objects.create(file=file, interaction=interaction)
+        
+        return Response({'status': 'comment added'})
+    
+    @action(detail=True, methods=['get'])
+    def timeline(self, request, pk=None):
+        audit = self.get_object()
+        interactions = audit.interaction_set.order_by('date')
+        
+        # Добавьте логирование для отладки
+        logger = logging.getLogger(__name__)
+        
+        serializer = InteractionSerializer(interactions, many=True)
+        
+        try:
+            return Response(serializer.data)
+        except ValueError as e:
+            logger.error(f"Error serializing interactions: {str(e)}")
+            # Возвращайте хотя бы базовые данные
+            safe_data = []
+            for interaction in interactions:
+                safe_data.append({
+                    'id': interaction.id,
+                    'expert_comment': interaction.expert_comment,
+                    'participant_comment': interaction.participant_comment,
+                    'date': interaction.date,
+                    'audit': interaction.audit_id,
+                    'files': None  # Игнорируем проблемные файлы
+                })
+            return Response(safe_data)
+
 
 def download_file(request, filepath):
     try:

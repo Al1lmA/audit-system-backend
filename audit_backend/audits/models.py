@@ -57,8 +57,13 @@ class Report(models.Model):
     file = models.FileField(upload_to='final_reports/', null=True, blank=True)
 
 class Interaction(models.Model):
-    audit = models.ForeignKey(Audit, on_delete=models.CASCADE)
     expert_comment = models.TextField(blank=True)
     participant_comment = models.TextField(blank=True)
     date = models.DateTimeField(auto_now_add=True)
-    files = models.FileField(upload_to='interactions/', null=True, blank=True)
+    audit = models.ForeignKey(Audit, on_delete=models.CASCADE)
+    # Поменяйте на одно из:
+    files = models.FileField(upload_to='interactions/', blank=True, null=True) 
+    
+class FileAttachment(models.Model):
+    file = models.FileField(upload_to='interactions/')
+    interaction = models.ForeignKey(Interaction, on_delete=models.CASCADE)

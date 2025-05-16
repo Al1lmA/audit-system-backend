@@ -83,4 +83,11 @@ class ReportSerializer(serializers.ModelSerializer):
 class InteractionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Interaction
-        fields = '__all__'
+        fields = ['id', 'expert_comment', 'participant_comment', 'date', 'files', 'audit']
+        
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        # Проверка на существование файла
+        if not instance.files or not instance.files.name:
+            ret['files'] = None
+        return ret
