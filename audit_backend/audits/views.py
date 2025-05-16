@@ -12,6 +12,10 @@ from django.contrib.auth import authenticate, login
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAdminUser
 from django.middleware.csrf import get_token
 # from django.views.decorators.csrf import csrf_exempt
+from django.http import FileResponse, Http404
+import os
+from django.conf import settings
+from urllib.parse import unquote, quote
 
 class GetCSRFToken(APIView):
     permission_classes = [AllowAny]
@@ -136,3 +140,54 @@ class InteractionViewSet(viewsets.ModelViewSet):
             return Response({'status': 'comment added'})
         return Response(serializer.errors, status=400)
 
+def download_file(request, filepath):
+    try:
+        # Декодируем путь к файлу
+        decoded_path = unquote(filepath)
+        full_path = os.path.join(settings.MEDIA_ROOT, decoded_path)
+        
+        if not os.path.exists(full_path):
+            raise Http404
+
+        # Определяем имя файла и MIME-тип
+        filename = os.path.basename(full_path)
+        mime_type, _ = mimetypes.guess_type(full_path) or 'application/octet-stream'
+        
+        # Отправляем файл с правильными заголовками
+        response = FileResponse(
+            open(full_path, 'rb'),
+            content_type=mime_type,
+            as_attachment=True
+        )
+        response['Content-Disposition'] = f'attachment; filename*=UTF-8\'\'{quote(filename)}'
+        return response
+        
+    except Exception as e:
+        print(f"Download error: {str(e)}")
+        raise Http404
+    
+def download_interaction_file(request, filename):
+    try:
+        # Декодируем имя файла из URL
+        decoded_filename = unquote(filename)
+        
+        # Формируем абсолютный путь к файлу
+        filepath = os.path.join(settings.MEDIA_ROOT, "interactions", decoded_filename)
+        print(f"Путь к файлу: {filepath}")  # Для отладки
+        
+        if not os.path.exists(filepath):
+            print(f"Файл не найден: {filepath}")
+            raise Http404
+
+        # Открываем файл и настраиваем ответ
+        response = FileResponse(
+            open(filepath, 'rb'),
+            content_type='application/octet-stream',
+            as_attachment=True,
+            filename=decoded_filename  # Указываем оригинальное имя файла
+        )
+        return response
+        
+    except Exception as e:
+        print(f"Ошибка скачивания: {str(e)}")
+        raise Http404
