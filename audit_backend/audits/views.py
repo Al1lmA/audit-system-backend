@@ -233,3 +233,35 @@ def download_interaction_file(request, filename):
     except Exception as e:
         print(f"Ошибка скачивания: {str(e)}")
         raise Http404
+
+class DashboardSummaryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        total_companies = Company.objects.count()
+        active_audits = Audit.objects.filter(status='In Progress').count()
+        completed_audits = Audit.objects.filter(status='Completed').count()
+        # Замените на свою логику для improvement_areas, если нужно
+        improvement_areas = Audit.objects.filter(status='Improvement Needed').count() if hasattr(Audit, 'status') else 0
+
+        return Response({
+            "total_companies": total_companies,
+            "active_audits": active_audits,
+            "completed_audits": completed_audits,
+            "improvement_areas": improvement_areas,
+        })
+    
+class AuditViewSet(viewsets.ModelViewSet):
+    queryset = Audit.objects.all()
+    serializer_class = AuditReadSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        recent = self.request.query_params.get('recent')
+        participant_id = self.request.query_params.get('participant')
+        if participant_id:
+            queryset = queryset.filter(participant_id=participant_id)
+        if recent:
+            queryset = queryset.order_by('-date')[:5]
+        return queryset

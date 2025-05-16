@@ -14,6 +14,7 @@ router.register(r'interactions', InteractionViewSet)
 urlpatterns = [
     path('users/login/', UserLoginView.as_view(), name='user-login'),
     path('csrf/', GetCSRFToken.as_view(), name='get-csrf-token'),
+    path('dashboard/summary/', DashboardSummaryView.as_view()),
     # path('download/<path:filepath>', download_file, name='download-file'),
     # path('api/download/interaction/<str:filename>/', download_interaction_file,  name='download_interaction_file'),
     path('', include(router.urls)),

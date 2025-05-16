@@ -67,3 +67,4 @@ class Interaction(models.Model):
 class FileAttachment(models.Model):
     file = models.FileField(upload_to='interactions/')
     interaction = models.ForeignKey(Interaction, on_delete=models.CASCADE)
+    

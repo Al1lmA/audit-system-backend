@@ -65,11 +65,25 @@ class CompanySerializer(serializers.ModelSerializer):
 class AuditWriteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Audit
-        fields = '__all__'
+        fields = [
+            'name', 
+            'start_date', 
+            'end_date', 
+            'framework', 
+            'objective', 
+            'company',  # Проверьте название поля
+            'participant',  # Проверьте название поля
+            'questionnaire_file'  # Если используется FileField
+        ]
+        extra_kwargs = {
+            'company': {'required': True},
+            'participant': {'required': True}
+        }
 
 class AuditReadSerializer(serializers.ModelSerializer):
     company = CompanySerializer(read_only=True)
     expert = UserSerializer(read_only=True)
+    company_name = serializers.CharField(source='company.name', read_only=True)
 
     class Meta:
         model = Audit
