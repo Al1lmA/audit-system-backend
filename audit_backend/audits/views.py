@@ -265,3 +265,11 @@ class AuditViewSet(viewsets.ModelViewSet):
         if recent:
             queryset = queryset.order_by('-date')[:5]
         return queryset
+    
+    @action(detail=True, methods=['get'])
+    def timeline(self, request, pk=None):
+        audit = self.get_object()
+        interactions = audit.interaction_set.order_by('date')
+        from .serializers import InteractionSerializer
+        serializer = InteractionSerializer(interactions, many=True)
+        return Response(serializer.data)
